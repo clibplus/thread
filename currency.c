@@ -1,3 +1,13 @@
+/*
+*
+*   [ Concurrency Thread Pool ]
+*
+* @title: Concurrency ThreadPool
+* @author: Algo1337
+* @since: 12/6/2024
+* @github: Algo1337
+*
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -120,6 +130,10 @@ void Counter(void *arg) {
     ToggleThread(c);
 }
 
+/*
+
+    - Debugging Function, Keep In Here!
+
 int main(void) {
     srand(time(NULL));
 
@@ -134,7 +148,7 @@ int main(void) {
     pthread_create(&c->PoolThread, NULL, (void *)StartPool, (void *)c);
 
     // Debugging - Checking Threads
-    iny i = 0;
+    int i = 0;
     while(1) {
         int running = CountRunningThreads(c);
         if(c->RunningThreads > c->MAX_THREADS)
@@ -155,3 +169,5 @@ int main(void) {
 
     return 0;
 }
+
+*/
