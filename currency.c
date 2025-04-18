@@ -48,6 +48,7 @@ int RemoveThread(ConcurrencyThread *c, cThread *thread) {
     cThread **arr = (cThread **)malloc(sizeof(cThread *) * 1);
     int idx = 0;
 
+    pthread_join(thread->id, NULL);
     for(int i = 0; i < c->ThreadCount; i++) {
         if(!c->Threads[i])
             break;
@@ -55,6 +56,7 @@ int RemoveThread(ConcurrencyThread *c, cThread *thread) {
         if(c->Threads[i] == thread) {
             c->Threads[i]->Destruct(thread);
             c->Threads[i] = NULL;
+            continue;
         }
 
         arr[idx] = c->Threads[i];
@@ -62,7 +64,9 @@ int RemoveThread(ConcurrencyThread *c, cThread *thread) {
         arr = (cThread **)realloc(arr, sizeof(cThread *) * (idx + 1));
     }
 
-    free(c->Threads);
+    if(c->Threads)
+        free(c->Threads);
+
     c->Threads = arr;
     c->ThreadCount = idx;
 
@@ -78,50 +82,39 @@ int GetRandomID() {
     return num;
 }
 
-int CountRunningThreads(ConcurrencyThread *c) {
-    int Count = 0;
-    for(int i = 0; i < c->ThreadCount; i++)
-        if(c->Threads[i]->Running)
-            Count++;
-
-    return Count;
-}
-
 void StartPool(ConcurrencyThread *c) {
+    c->PoolRunning = 1;
     while(1) {
         for(int i = 0; i < c->ThreadCount; i++) {
+            if(!c->Threads[i])
+                break;
+
             if(c->RunningThreads >= c->MAX_THREADS) {
-                sleep(1);
+                usleep(30000);
                 continue;
             }
+
+            if(c->Threads[i]->Running && !c->Threads[i]->Completed)
+                continue;
 
             if(c->Threads[i]->Completed) {
+                ToggleThread(c->Threads[i]);
                 RemoveThread(c, c->Threads[i]);
-            }
-
-            if(c->Threads[i]->Running) {
-                continue;
+                break;
             }
 
             ToggleThread(c->Threads[i]);
+            printf("[ THREADPOOL ] Running %d...\n", c->Threads[i]->TID);
             pthread_create(&c->Threads[i]->id, NULL, (void *)c->Threads[i]->Handler, c->Threads[i]);
         }
 
-        if(CountRunningThreads(c) == 0)
+        if(c->RunningThreads == 0)
             break;
 
-        sleep(1);
+        usleep(30000);
+        printf("[ THREADPOOL ] Running %d threads...\n", c->RunningThreads);
     }
+
+    printf("[ THREADPOOL ] Exiting....!\n");
+    c->PoolRunning = 0;
 }
-
-// void Counter(void *arg) {
-//     cThread *c = (cThread *)arg;
-//     printf("Starting Thread: %d = > Running State: %d\n", c->TID, c->Running);
-
-//     for(int i = 0; i < (int)c->args[1]; i++)
-//         sleep(1);
-
-//     printf("[%d] Completed Thread: %d:%d...!\n", (int)c->args[0], c->TID, c->Running);
-//     ToggleThread(c);
-//     pthread_exit(NULL);
-// }

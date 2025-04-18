@@ -45,7 +45,7 @@ int main(void) {
 */
 
 typedef struct cThread {
-    char        TID;
+    int         TID;
     void        (*Handler)();
 
     void        **args;
@@ -66,6 +66,7 @@ typedef struct ConcurrencyThread {
     long        ThreadCount;
     int         RunningThreads;
 
+    int         PoolRunning;
     pthread_t   PoolThread;
 } ConcurrencyThread;
 
