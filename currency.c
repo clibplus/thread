@@ -89,32 +89,31 @@ void StartPool(ConcurrencyThread *c) {
             if(!c->Threads[i])
                 break;
 
-            if(c->RunningThreads >= c->MAX_THREADS) {
-                usleep(30000);
+            if(c->Threads[i]->ForeverUp)
                 continue;
-            }
-
-            if(c->Threads[i]->Running && !c->Threads[i]->Completed)
-                continue;
-
+            
             if(c->Threads[i]->Completed) {
                 ToggleThread(c->Threads[i]);
                 RemoveThread(c, c->Threads[i]);
                 break;
+            } else if(c->Threads[i]->Running && !c->Threads[i]->Completed) {
+                usleep(30000);
+                continue;
+            } else if(c->RunningThreads >= c->MAX_THREADS) {
+                usleep(30000);
+                continue;
             }
 
             ToggleThread(c->Threads[i]);
-            printf("[ THREADPOOL ] Running %d...\n", c->Threads[i]->TID);
             pthread_create(&c->Threads[i]->id, NULL, (void *)c->Threads[i]->Handler, c->Threads[i]);
+            usleep(30000);
         }
 
-        if(c->RunningThreads == 0)
+        if(c->RunningThreads == 0 && c->ThreadCount < 2)
             break;
 
-        usleep(30000);
-        printf("[ THREADPOOL ] Running %d threads...\n", c->RunningThreads);
+        usleep(1);
     }
 
-    printf("[ THREADPOOL ] Exiting....!\n");
     c->PoolRunning = 0;
 }

@@ -4,7 +4,7 @@
 
 #include "currency.h"
 
-cThread *StartThread(void *fn, void **args) {
+cThread *StartThread(void *fn, void **args, int stay_up) {
     cThread *c = (cThread *)malloc(sizeof(cThread));
     *c = (cThread){
         .TID = (rand() % (10000 - 1 + 1)) + 1,
@@ -12,12 +12,22 @@ cThread *StartThread(void *fn, void **args) {
         .args = args,
         .Completed = 0,
         .Running = 0,
+        .ForeverUp = stay_up,
         .Destruct = DestroyThread
     };
 
     if(args != NULL)
         while(args[c->c] != NULL) c->c++;
+
     return c;
+}
+
+int ToggleLock(cThread *c) {
+    if(!c)
+        return 0;
+
+    c->Lock = (!c->Lock ? 1 : 0);
+    return c->Lock;
 }
 
 void ToggleThread(cThread *c) 

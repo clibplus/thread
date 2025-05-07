@@ -18,6 +18,7 @@ Thread NewThread(void *Fnc, void **Args, void *Retvar, void *Siggy) {
 		.Fn			= Fnc,
 		.SigHandler = Siggy,
 		.Running 	= 0,
+		.Foreverup  = 0,
 
 		.Toggle 	= _Toggle,
 		.SetArgs	= _SetArgs,

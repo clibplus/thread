@@ -54,8 +54,10 @@ typedef struct cThread {
     pthread_t   id;
     int         Running;
     int         Completed;
+	int 		ForeverUp;
     void        *Base;
 
+    int         Lock;
     void        (*Destruct) (struct cThread *thread);
 } cThread;
 
@@ -80,7 +82,7 @@ int CountRunningThreads(ConcurrencyThread *c);
 
 // == [ cThread ] ==
 
-cThread *StartThread(void *fn, void **args);
+cThread *StartThread(void *fn, void **args, int stay_up);
 void ToggleThread(cThread *c);
 void ToggleComplete(cThread *c);
 void DestroyThread(cThread *thread);
